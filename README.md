@@ -14,6 +14,10 @@ modules or libraries etc. Also it  only consists of one file. Well, in
 fact,  there are  two files,  one contains  german and  the other  one
 english comments inside.
 
+## Screenshot
+
+![demo](http://www.daemon.de/idisk/Misc/emacs-skel.png)
+
 ## Install
 
 Copy  the file  `dot-emacs-de`  or `dot-emacs-en`  into the  directory
