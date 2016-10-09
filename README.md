@@ -31,7 +31,7 @@ want to use it yourself.
 
 If you just want to test it without installing, issue:
 
-    emacs -q -l .emacs
+    emacs -q -l dot-emacs-en
     
 ## Requirements
 
