@@ -1,0 +1,320 @@
+;; * Standard emacs Konfigurationsdatei  -*-emacs-lisp-*-
+;;
+;; https://github.com/TLINDEN/emacs-skel
+
+;; * Im GUI-mode Fontlock-mode (Farben) einschalten
+;; siehe: https://www.emacswiki.org/emacs/CustomizingBoth
+(if window-system
+    (progn
+      (global-font-lock-mode 1)
+      (set-background-color "white")
+      (set-foreground-color "DarkBlue")
+      ))
+
+;; * cursor als Zeile im Terminal anzeigen, sonst nicht
+(unless (display-graphic-p)
+  ;; else (optional)
+  (global-hl-line-mode)
+  (set-face-background hl-line-face "DarkGray")
+  (set-face-foreground hl-line-face "Black")
+  )
+
+;; --------------------------------------------------------------------------------
+;; * Console Backspace Korrektur
+(define-key key-translation-map [?\C-h] [?\C-?])
+
+;; * Ein paar sinnvolle Defaults
+(setq make-backup-files nil) ;; keine ~ backups
+
+;; Toolbar abschalten
+(tool-bar-mode -1)
+
+;; Menübar abschalten (standard: ein)
+;; (menu-bar-mode -1)
+
+;; Dialogboxen abschalten (standard: ein)
+;; (setq use-dialog-box nil)
+
+;; Scrolleisten abschalten (standard: ein)
+;; (scroll-bar-mode 0)
+
+;; Weniger Ausgaben beim Starten
+(setq inhibit-startup-message t)
+(setq inhibit-startup-screen t)
+
+;; Spaltennummer anzeigen
+(column-number-mode t)
+
+;; x11 Fenstertitel
+(setq frame-title-format '(buffer-file-name "emacs %f" ("emacs %b")))
+
+;; gültige Unixdateien erzeugen
+(setq require-final-newline t)
+
+;; matchende Klammern anzeigen
+(show-paren-mode 1)
+
+;; Cursor bleibt beim Scrollen stehen
+(setq scroll-preserve-screen-position t)
+
+;; keine Kommentar Ränder
+(setq-default comment-column 0)
+
+;; kein auto-save
+(setq auto-save-default nil)
+
+;; immer alle buffer anzeigen
+(setq buffers-menu-max-size nil)
+(setq mouse-buffer-menu-mode-mult 30)
+
+;; alle Befehle verwendbar
+(setq disabled-command-function nil)
+
+;; Markieren == Kopieren
+(setq mouse-drag-copy-region t)
+
+;; mehr Ram
+(setq gc-cons-threshold 20000000)
+
+;; --------------------------------------------------------------------------------
+;; * Scratch Buffer
+
+;; default Inhalt des *scratch* buffers == Kurzhilfe
+
+(setq initial-scratch-message ";;
+;; Kurzhilfe (Tasten: C == Control, M == Alt):
+
+;; Kombination (z.b. C-x C-f): Control gedrückt halten, dann x dann f
+;; Kaskade (z.b. C-x 3): Control und x drücken, loslassen, dann 2
+;; Taste mit Maus (z.b. C-mouse1): Control drücken und linke Maustaste
+
+;; M-x <cmd>   Emacs lisp Befehl ausführen   | M-w     Markiertes Kopieren
+;; C-x C-f     Datei öffnen                  | C-w     Markiertes Löschen
+;; C-x C-S     Datei speichern               | C-y     Einfügen (Paste)
+;; C-x C-q     Buffer mit Datei schliessen   | C-g     Abbrechen
+;; C-mouse-1   Popup Bufferliste             | C-s     Vorwärts Suchen
+;; C-x 2       Fenster quer teilen           |         nochmal: next match
+;; C-x 3       Fenster hochkant teilen       | C-r     Rückwärts Suchen
+;; M-o         zwischen Buffern wechseln     | C-x C-c Emacs Beenden
+;; C-x 1       nur noch 1 Buffer im Fenster  | C-x b   Buffer wechseln
+;; C-x k       aktuellen Buffer schliessen   | C-c i   Farben Invertieren
+
+;; C-<del>     Wort links löschen      | C-<entf>  Wort rechts löschen
+;; C-<up>      Paragraph hoch springen | C-<down>  Paragraph runter springen
+;; C-<left>    Wort links springen     | C-<right> Wort rechts springen
+;; C-_         UNDO                    | C-g C-_ REDO
+;; <pos1> oder C-a      Anfang Zeile, Anfang Window, Anfang Buffer
+;; <end>  oder C-e      Ende Zeile, Ende Window, Ende Buffer
+
+;; M-x query-replace         Suchen/Ersetzen
+;; M-x query-replace-regex   dito, mit regex (man perlre)
+;; M-x <xxx-mode>            (xxx: cperl, ruby etc) Mode einschalten
+
+;; Konfiguration: ~/.emacs, Tutorial: C-h t, https://emacswiki.org/
+
+;; Dies ist der *scratch* Buffer für kurze Notizen oder elisp Tests.
+
+")
+
+;; --------------------------------------------------------------------------------
+;; * y für yes
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;; --------------------------------------------------------------------------------
+;; * TAB/Indent
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+(setq indent-line-function 'insert-tab)
+(setq tab-stop-list (quote (4 8 12 16 20 24 28 32 36 40 44
+                              48 52 56 60 64 68 72 76 80 84
+                              88 92 96 100 104 108 112 116 120)))
+(setq tab-always-indent 'complete)
+(add-hook 'makefile-mode-hook '(lambda() (setq indent-tabs-mode t)))
+
+;; --------------------------------------------------------------------------------
+;; * Hilfsfunktion
+(defun add-something-to-mode-hooks (mode-list something)
+  "helper function to add a callback to multiple hooks"
+  (dolist (mode mode-list)
+    (add-hook (intern (concat (symbol-name mode) "-mode-hook")) something)))
+
+;; * Standard Tastaturbelegungen
+;; --------------------------------------------------------------------------------
+;; c-h != delete
+(keyboard-translate ?\C-h ?\C-?)
+(keyboard-translate ?\C-? ?\C-h)
+
+;; general keys (re-)mappings
+(global-set-key (kbd "C-s")             'isearch-forward-regexp)
+(global-set-key (kbd "C-r")             'isearch-backward-regexp)
+(global-set-key (kbd "<backtab>")       'dabbrev-completion) ; shift-TAB: inline completion
+(global-set-key (kbd "M-o")             'other-window)       ; Buffer wechseln
+(global-set-key (kbd "<delete>")        'delete-char)
+(global-set-key (kbd "<backspace>")     'backward-delete-char)
+(global-set-key (kbd "S-<delete>")      'kill-word)          ; Shift+Entf      Wort loeschen
+(global-set-key (kbd "S-<backspace>")   'backward-kill-word) ; Shift+Backspace dito
+(global-set-key (kbd "C-<delete>")      'kill-word)          ; Shift+Entf      dito
+(global-set-key (kbd "C-<backspace>")   'backward-kill-word) ; Shift+Backspace dito 
+(global-unset-key (kbd "C-z"))
+(global-set-key (kbd "C-x k")           'kill-this-buffer)   ; Buffer gleich zumachen
+
+;; --------------------------------------------------------------------------------
+;; * Vor- und Hintergrund invertieren
+
+;; remember last inverse
+(defvar my-invert-state t)
+
+;; invert everything, reverse it when called again
+(defun my-invert()
+  "invert fg-bg"
+  (interactive)
+  (invert-face 'default)
+  (invert-face 'mode-line)
+  (set-face-attribute 'fringe nil :inverse-video my-invert-state)
+  (setq my-invert-state (not my-invert-state)) ;; cycle variable my-invert-state
+  )
+
+(global-set-key (kbd "C-c i")           'my-invert)
+
+;; --------------------------------------------------------------------------------
+;; * Belegung für POS1 und ENDE Tasten (bzw CTRL-a und CTRL-e)
+
+;; frm viking-mode:
+(defun my-last-key-repeats ()
+  "Returns how many times the last key has been pressed as integer."
+  (interactive)
+  (let* ((keys    (reverse (append (recent-keys) nil)))
+         (pressed (car keys))
+         (times   0))
+    (progn
+      (catch 'nomore
+        (dolist (k keys)
+          (if (equal pressed k)
+              (setq times (+ times 1))
+            (throw 'nomore t))))
+      times)))
+
+(defun pc-keys-home ()
+  "Go to beginning of  line/window/buffer. First hitting key goes
+to  beginning of  line,  second in  a row  goes  to beginning  of
+window, third in a row goes to beginning of buffer."
+  (interactive)
+  (let* (
+         (key-times (my-last-key-repeats)))
+    (cond
+     ((eq key-times 3)
+      (if mark-active
+          (goto-char (point-min))
+        (beginning-of-buffer)))
+     
+     ((eq key-times 2)
+      (if mark-active () (push-mark))
+      (move-to-window-line 0))
+     
+     ((eq key-times 1)
+      (beginning-of-line))
+     )))
+
+(defun pc-keys-end ()
+  "Go to end of  line/window/buffer. First hitting key goes
+to end  of line, second  in a  row goes to  end of
+window, third in a row goes to end of buffer."
+  (interactive)
+  (let* (
+         (key-times (my-last-key-repeats)))
+    (cond
+     ((eq key-times 3)
+      (if mark-active
+          (goto-char (point-max))
+        (end-of-buffer)))
+     
+     ((eq key-times 2)
+      (if mark-active () (push-mark))
+      (move-to-window-line -1)
+      (end-of-line)
+      )
+     
+     ((eq key-times 1)
+      (end-of-line))
+     )))
+
+(global-set-key (kbd "<home>")        'pc-keys-home)
+(global-set-key (kbd "<end>")         'pc-keys-end)
+(global-set-key (kbd "C-a")           'pc-keys-home)
+(global-set-key (kbd "C-e")           'pc-keys-end)
+
+;; --------------------------------------------------------------------------------
+;; * IDO mode - bessere Completion beim Datei öffnen usw.
+
+;; Um im IDO Mode zum normalen Mode zu gelangen, erneut CTRL-f drücken
+(ido-mode t)
+(ido-everywhere nil)
+(setq ido-enable-flex-matching t)
+(setq ido-use-filename-at-point nil)
+(setq ido-use-virtual-buffers t)
+(setq ido-auto-merge-work-directories-length -1)
+
+;; IDO nicht bei C-x C-w benutzen (save as ...)
+(defvar my-ido-disabled nil)
+(advice-add 'ido-write-file :before '(lambda (&rest args) (ido-mode 0) (setq my-ido-disabled t)))
+(advice-add 'ido-write-file :after  '(lambda (&rest args) (ido-mode 1) (setq my-ido-disabled nil)))
+
+(defun my-keyboard-quit-advice (fn &rest args)
+  (when my-ido-disabled
+    (ido-mode 1)
+    (setq my-ido-disabled nil))
+  (apply fn args))
+
+(advice-add 'abort-recursive-edit :around #'my-keyboard-quit-advice)
+
+
+;; --------------------------------------------------------------------------------
+;; * TABs hervorheben
+
+(defface extra-whitespace-face
+  '((t (:background "pale green")))
+  "Used for tabs and such.")
+
+(defvar my-extra-keywords
+  '(("\t" . 'extra-whitespace-face)))
+
+(add-something-to-mode-hooks '(c c++ vala cperl emacs-lisp python shell-script)
+                             (lambda () (font-lock-add-keywords nil my-extra-keywords)))
+
+
+;; --------------------------------------------------------------------------------
+;; * Emacs Autoconfig / Customizegroup Speicherplatz
+
+;; Hier schreibt Emacs rein, wenn man irgendwas über
+;; M-x customize-group <RET> <group> <RET>
+;; interaktiv anpasst.
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ '(default ((t (:family "DejaVu Sans Mono" :foundry "unknown" :slant normal :weight normal :width normal))))
+ '(cperl-nonoverridable-face ((((class color) (background light)) (:foreground "Magenta"))))
+ '(custom-documentation-face ((t (:foreground "Navy"))) t)
+ '(custom-group-tag-face-1 ((((class color) (background light)) (:underline t :foreground "VioletRed"))) t)
+ '(font-lock-builtin-face ((t (:foreground "BlueViolet"))))
+ '(font-lock-comment-face ((t (:foreground "DarkGreen"))))
+ '(font-lock-constant-face ((t (:foreground "Magenta"))))
+ '(font-lock-function-name-face ((t (:bold nil :foreground "DarkOrchid"))))
+ '(font-lock-keyword-face ((t (:foreground "Blue"))))
+ '(font-lock-string-face ((t (:foreground "Red"))))
+ '(font-lock-type-face ((t (:foreground "DarkSlateBlue"))))
+ '(font-lock-variable-name-face ((t (:foreground "Sienna"))))
+ '(font-lock-warning-face ((t (:bold t :foreground "Red"))))
+ '(highlight ((t (:background "DodgerBlue2" :foreground "White"))))
+ '(ido-only-match ((t (:foreground "dark green" :weight bold))))
+ '(mode-line ((t (:foreground "White" :background "Blue"))))
+ '(mode-line-inactive ((t (:foreground "White" :background "DimGray"))))
+ '(outline-1 ((t (:inherit font-lock-function-name-face :underline t :weight bold))))
+ '(outline-2 ((t (:inherit font-lock-variable-name-face :underline t :weight bold))))
+ '(outline-3 ((t (:inherit font-lock-keyword-face :underline t :weight bold))))
+ '(outline-4 ((t (:inherit font-lock-comment-face :underline t))))
+ '(region ((t (:foreground "Aquamarine" :background "Darkblue"))))
+ '(secondary-selection ((t (:foreground "Green" :background "darkslateblue")))))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ )
